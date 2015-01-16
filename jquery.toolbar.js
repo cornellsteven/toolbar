@@ -138,38 +138,44 @@ if ( typeof Object.create !== 'function' ) {
                 self.toolbar_arrow.css(self.arrowCss);
         },
 
-        getCoordinates: function( position, adjustment ) {
-            var self = this;
+        getCoordinates: function( position, adj ) {
+            var self,
+                scl, stw, sew,
+                sct, sth, seh,
+                pos;
+            
+            self = this;
             self.coordinates = self.$elem.offset();
-
+            pos = self.options.position;
+            
             if (self.options.adjustment && self.options.adjustment[self.options.position]) {
-                adjustment = self.options.adjustment[self.options.position] + adjustment;
+                adj = self.options.adjustment[self.options.position] + adj;
             }
-
-            switch(self.options.position) {
+            
+            // Calcs for left/right
+            scl = self.coordinates.left;        // Trigger offset left
+            stw = self.toolbar.width();         // Toolbar width
+            sew = self.$elem.outerWidth();      // Trigger width
+            
+            // Calcs for top/bottom
+            sct = self.coordinates.top;         // Trigger offset top
+            sth = self.toolbar.height();        // Toolbar height
+            seh = self.$elem.outerHeight();     // Trigger height
+            
+            switch (pos) {
                 case 'top':
-                    return {
-                        left: self.coordinates.left-(self.toolbar.width()/2)+(self.$elem.outerWidth()/2),
-                        top: self.coordinates.top-self.$elem.height()-adjustment,
-                        right: 'auto'
-                    };
-                case 'left':
-                    return {
-                        left: self.coordinates.left-(self.toolbar.width()/2)-(self.$elem.width()/2)-adjustment,
-                        top: self.coordinates.top-(self.toolbar.height()/2)+(self.$elem.outerHeight()/2),
-                        right: 'auto'
-                    };
-                case 'right':
-                    return {
-                        left: self.coordinates.left+(self.toolbar.width()/2)+(self.$elem.width()/3)+adjustment,
-                        top: self.coordinates.top-(self.toolbar.height()/2)+(self.$elem.outerHeight()/2),
-                        right: 'auto'
-                    };
                 case 'bottom':
                     return {
-                        left: self.coordinates.left-(self.toolbar.width()/2)+(self.$elem.outerWidth()/2),
-                        top: self.coordinates.top+self.$elem.height()+adjustment,
-                        right: 'auto'
+                        top     : ( pos == 'top' ? ( sct - seh - adj ) : ( sct + seh + adj ) ),
+                        left    : ( scl - (stw / 2) + (sew / 2) ),
+                        right   : 'auto'
+                    };
+                case 'left':
+                case 'right':
+                    return {
+                        top     : ( sct - (sth / 2) + (seh / 2) ),
+                        left    : ( pos == 'left' ? ( scl - stw - adj ) : ( scl + sew + adj ) ),
+                        right   : 'auto'
                     };
             }
         },
